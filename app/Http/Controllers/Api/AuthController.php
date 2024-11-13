@@ -9,26 +9,23 @@ use App\Http\Requests\LoginRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use App\Events\UserRegistered;
+use App\Actions\UplaodFileAction;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request) {
-
-        if($request->hasFile('image')) {
-            $imageName = time() . '-' . $request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
-            $request->image = $imageName;
-        }
+    public function register(RegisterRequest $request, UplaodFileAction $uplaoder) {
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'image' => $request->image
+            'image' => $request->hasFile('image') ? $uplaoder->handle($request->image) : null
         ]);
 
-        $token = $user->createToken('Auth Token')->plainTextToken ;
+        //event(new UserRegistered($user));
+
+        $token = $user->createToken($user->name)->plainTextToken ;
 
         return $this->successResponse([
             'token' => $token,
