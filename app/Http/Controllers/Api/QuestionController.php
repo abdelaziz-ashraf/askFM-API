@@ -13,9 +13,13 @@ class QuestionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $questionsPerPage = $request->query('per_page', 10);
+        $page = $request->query('page', 10);
 
+        $questions = Question::with(['user', 'answers'])->paginate($questionsPerPage, ['*'], 'page', $page);
+        return $this->successResponse($questions, 'Get all questions successfully.', 200);
     }
 
     /**
@@ -23,17 +27,14 @@ class QuestionController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::check()) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
-        
+
         $data = $request->validate([
             'body' => 'required|string'
         ]);
 
         $question = Question::create([
-            'user_id' => Auth::id(),
-            'body' => $data->body
+            'user_id' => Auth::user()->id,
+            'body' => $data['body']
         ]);
 
         return $this->successResponse($question, 'Question created successfully', 201);

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Answer extends Model
 {
@@ -10,7 +11,7 @@ class Answer extends Model
 
     protected $fillable = [
         'body',
-        'user_is',
+        'user_id',
         'question_id'
     ];
 
