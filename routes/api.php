@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\QuestionController;
 
 Route::post('register', [AuthController::class, 'register'])->name('register');
 Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('/email/verify-code', [AuthController::class, 'verifyCode']);
 
 Route::post('/questions', [QuestionController::class, 'store'])
     ->middleware('auth:sanctum');
