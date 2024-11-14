@@ -24,4 +24,9 @@ class Answer extends Model
     {
         return $this->belongsTo(Question::class);
     }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
 }

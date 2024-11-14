@@ -18,4 +18,7 @@ Route::get('/questions', [QuestionController::class, 'index']);
 Route::post('/answers/{question_id}', [AnswerController::class, 'store'])
     ->middleware('auth:sanctum');
 
+Route::get('/answers/{question_id}', [AnswerController::class, 'index']);
 Route::get('/answers/{user}', [AnswerController::class, 'userAnswers']);
+Route::post('/answers/{answer_id}/toggle-like', [AnswerController::class, 'toggleLike'])
+    ->middleware('auth:sanctum');
