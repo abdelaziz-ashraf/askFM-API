@@ -36,6 +36,6 @@ class SendVerificationCodeListener
         ]);
 
         Log::error('Code Sent .. ');
-        Mail::to($user->email)->send(new VerificationCodeEmail($code));
+        Mail::to($user->email)->queue(new VerificationCodeEmail($code));
     }
 }

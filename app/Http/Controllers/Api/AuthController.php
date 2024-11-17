@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\VerifyCodeRequest;
 use App\Models\VerificationCode;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
@@ -71,6 +72,7 @@ class AuthController extends Controller
         }
 
         $user->markEmailAsVerified();
+        event(new Verified($user));
         $verificationCode->delete();
 
         return $this->successResponse(null, 'Code Verified Successfully', 200);
