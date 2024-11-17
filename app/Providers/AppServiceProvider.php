@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\LikeCreated;
 use App\Events\QuestionSent;
+use App\Listeners\SendLikeNotification;
 use App\Listeners\SendQuestionNotification;
 use App\Listeners\SendVerificationCodeListener;
 use App\Listeners\SendWelcomeEmail;
@@ -43,6 +45,11 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             QuestionSent::class,
             SendQuestionNotification::class
+        );
+
+        Event::listen(
+            LikeCreated::class,
+            SendLikeNotification::class
         );
 
     }
