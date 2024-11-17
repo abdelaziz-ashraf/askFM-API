@@ -10,7 +10,7 @@ Route::post('register', [AuthController::class, 'register'])->name('register');
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('/email/verify-code', [AuthController::class, 'verifyCode']);
 
-Route::post('/questions', [QuestionController::class, 'store'])
+Route::post('/questions/{receiver}', [QuestionController::class, 'store'])
     ->middleware('auth:sanctum');
 
 Route::get('/questions', [QuestionController::class, 'index']);

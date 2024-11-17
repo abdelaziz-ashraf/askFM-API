@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\QuestionSent;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Question;
 use Illuminate\Support\Facades\Auth;
@@ -25,17 +27,21 @@ class QuestionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, User $receiver)
     {
 
         $data = $request->validate([
-            'body' => 'required|string'
+            'body' => 'required|string',
         ]);
 
         $question = Question::create([
             'user_id' => Auth::user()->id,
-            'body' => $data['body']
+            'body' => $data['body'],
+            'receiver' => $receiver->id
         ]);
+
+
+        event(new QuestionSent($question, $receiver));
 
         return $this->successResponse($question, 'Question created successfully', 201);
 

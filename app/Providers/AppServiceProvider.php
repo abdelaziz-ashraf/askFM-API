@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\QuestionSent;
+use App\Listeners\SendQuestionNotification;
 use App\Listeners\SendVerificationCodeListener;
 use App\Listeners\SendWelcomeEmail;
 use Illuminate\Auth\Events\Registered;
@@ -37,5 +39,11 @@ class AppServiceProvider extends ServiceProvider
             Verified::class,
             SendWelcomeEmail::class
         );
+
+        Event::listen(
+            QuestionSent::class,
+            SendQuestionNotification::class
+        );
+
     }
 }

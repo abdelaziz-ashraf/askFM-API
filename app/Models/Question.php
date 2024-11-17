@@ -13,15 +13,21 @@ class Question extends Model
     protected $fillable = [
         'body',
         'user_id',
+        'receiver'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function answers()
     {
         return $this->hasMany(Answer::class);
+    }
+
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'receiver', 'id');
     }
 }
