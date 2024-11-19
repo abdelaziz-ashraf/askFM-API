@@ -14,10 +14,13 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Actions\UplaodFileAction;
+use App\Http\Resources\UserResource;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request, UplaodFileAction $uplaoder) {
+    public function register(RegisterRequest $request, UplaodFileAction $uplaoder)
+    {
 
         $user = User::create([
             'name' => $request->name,
@@ -28,46 +31,53 @@ class AuthController extends Controller
 
         event(new Registered($user));
 
-        $token = $user->createToken($user->name)->plainTextToken ;
+        $token = $user->createToken('verification')->plainTextToken;
 
         return $this->successResponse([
             'token' => $token,
-            'user' => $user
+            'user' => UserResource::make($user)
         ], 'User Registered Successfully', 200);
     }
 
-    public function login(LoginRequest $request) {
+    public function login(LoginRequest $request)
+    {
 
-        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
+
+            if ($user->email_verified_at == null) {
+                throw ValidationException::withMessages([
+                    'email' => ['please verify ur email.'],
+                ]);
+            }
 
             $token = $user->createToken('Auth Token')->plainTextToken;
 
             return $this->successResponse([
                 'token' => $token,
-                'user' => $user
+                'user' => UserResource::make($user)
             ], 'User Login Successfully', 200);
-
         }
 
-        return $this->errorResponse('Invalid credentials', 401);
-
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
     }
 
     public function verifyCode(VerifyCodeRequest $request)
     {
         $user = User::where('email', $request->email)->first();
-        if(!$user) {
+        if (!$user) {
             return $this->errorResponse('User not found', 404);
         }
 
         $verificationCode = VerificationCode::where('user_id', $user->id)
             ->where('code', $request->code)->first();
-        if(!$verificationCode) {
+        if (!$verificationCode) {
             return $this->errorResponse('Invalid code', 401);
         }
 
-        if($verificationCode->expires_at < now()) {
+        if ($verificationCode->expires_at < now()) {
             return $this->errorResponse('Expired code', 401);
         }
 
@@ -77,5 +87,4 @@ class AuthController extends Controller
 
         return $this->successResponse(null, 'Code Verified Successfully', 200);
     }
-
 }
