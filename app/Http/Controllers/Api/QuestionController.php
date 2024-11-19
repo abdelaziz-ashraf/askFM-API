@@ -36,6 +36,7 @@ class QuestionController extends Controller
      */
     public function store(Request $request, User $receiver)
     {
+        //TODO:: use form request
         //TODO:: validate user cant ask question to himself
         //TODO:: validate trash words
 

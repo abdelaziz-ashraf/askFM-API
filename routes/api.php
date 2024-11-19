@@ -21,3 +21,5 @@ Route::get('/answers/{question_id}', [AnswerController::class, 'index']);
 Route::get('/answers/{user}', [AnswerController::class, 'userAnswers']);
 Route::post('/answers/{answer_id}/toggle-like', [AnswerController::class, 'toggleLike'])
     ->middleware('auth:sanctum');
+
+//TODO:: USE ROUTE GROUPS TO ORGANIZE ROUTES

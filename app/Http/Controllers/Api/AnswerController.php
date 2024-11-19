@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\LikeCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAnswerRequest;
 use App\Models\Answer;
 use App\Models\Like;
-use App\Models\Question;
+use App\Notifications\LikeQuestionNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,13 +21,8 @@ class AnswerController extends Controller
 
     public function store(StoreAnswerRequest $request, $question_id)
     {
-
-        if (! Question::where('id', $question_id)->where('receiver', Auth::id())->exists()) {
-            return $this->errorResponse('Not authorized', 401);
-        }
-
         $answer = Answer::create([
-            'question_id' => intval($question_id),
+            'question_id' => (int) ($question_id),
             'body' => $request->get('body'),
             'user_id' => Auth::id(),
         ]);
@@ -59,7 +53,7 @@ class AnswerController extends Controller
             'answer_id' => $answer_id,
         ]);
 
-        event(new LikeCreated($answer, $answer->user));
+        $answer->user->notify(new LikeQuestionNotification($answer->question));
 
         return $this->successResponse(null, 'Answer liked successfully.');
     }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Question;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreAnswerRequest extends FormRequest
 {
@@ -11,6 +13,10 @@ class StoreAnswerRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        if (! Question::where('id', $this->question_id)->where('receiver', Auth::id())->exists()) {
+            return false;
+        }
+
         return true;
     }
 

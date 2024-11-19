@@ -30,8 +30,8 @@ class SendUnansweredQuestionsEmails extends Command
     public function handle()
     {
         $users = User::all();
-
         foreach ($users as $user) {
+            \App\Models\Question::doesntHave('answers')->get();
             $user['unansweredQuestionsCount'] = Question::whereNotIn('id', function ($query) use ($user) {
                 $query->select('question_id')->from('answers')->where('user_id', $user->id);
             })
