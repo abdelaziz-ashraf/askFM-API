@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Events\QuestionSent;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\QuestionResource;
+use App\Models\Question;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Models\Question;
 use Illuminate\Support\Facades\Auth;
-
 
 class QuestionController extends Controller
 {
@@ -23,6 +22,7 @@ class QuestionController extends Controller
         $page = $request->query('page', 10);
 
         $questions = Question::with(['user', 'answers'])->paginate($questionsPerPage, ['*'], 'page', $page);
+
         return $this->successResponse(QuestionResource::collection($questions), 'Get all questions successfully.', 200, [
             'total' => $questions->total(),
             'per_page' => $questions->perPage(),
@@ -46,9 +46,8 @@ class QuestionController extends Controller
         $question = Question::create([
             'user_id' => Auth::user()->id,
             'body' => $data['body'],
-            'receiver' => $receiver->id
+            'receiver' => $receiver->id,
         ]);
-
 
         event(new QuestionSent($question, $receiver));
 

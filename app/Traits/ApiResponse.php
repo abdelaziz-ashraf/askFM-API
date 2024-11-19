@@ -10,16 +10,16 @@ trait ApiResponse
             'status' => 'Success',
             'message' => $message,
             'data' => $data,
-            'meta' => $meta
+            'meta' => $meta,
         ], $code);
     }
 
-    protected function errorResponse($message = null, $code)
+    protected function errorResponse($message, $code)
     {
         return response()->json([
             'status' => 'Error',
             'message' => $message,
-            'data' => null
+            'data' => null,
         ], $code);
     }
 }

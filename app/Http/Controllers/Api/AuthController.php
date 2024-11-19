@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\UplaodFileAction;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\VerifyCodeRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use App\Models\VerificationCode;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Http\Request;
-use App\Http\Requests\RegisterRequest;
-use App\Http\Requests\LoginRequest;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use App\Actions\UplaodFileAction;
-use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -26,7 +25,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'image' => $request->hasFile('image') ? $uplaoder->handle($request->image) : null
+            'image' => $request->hasFile('image') ? $uplaoder->handle($request->image) : null,
         ]);
 
         event(new Registered($user));
@@ -35,7 +34,7 @@ class AuthController extends Controller
 
         return $this->successResponse([
             'token' => $token,
-            'user' => UserResource::make($user)
+            'user' => UserResource::make($user),
         ], 'User Registered Successfully', 200);
     }
 
@@ -55,7 +54,7 @@ class AuthController extends Controller
 
             return $this->successResponse([
                 'token' => $token,
-                'user' => UserResource::make($user)
+                'user' => UserResource::make($user),
             ], 'User Login Successfully', 200);
         }
 
@@ -67,13 +66,13 @@ class AuthController extends Controller
     public function verifyCode(VerifyCodeRequest $request)
     {
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
+        if (! $user) {
             return $this->errorResponse('User not found', 404);
         }
 
         $verificationCode = VerificationCode::where('user_id', $user->id)
             ->where('code', $request->code)->first();
-        if (!$verificationCode) {
+        if (! $verificationCode) {
             return $this->errorResponse('Invalid code', 401);
         }
 
