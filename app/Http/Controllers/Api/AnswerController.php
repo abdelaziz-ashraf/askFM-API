@@ -15,7 +15,6 @@ class AnswerController extends Controller
     public function index($question_id)
     {
         $answers = Answer::where('question_id', $question_id)->with('likes')->get();
-
         return $this->successResponse($answers, 'Answers retrieved successfully.');
     }
 

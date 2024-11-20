@@ -13,6 +13,7 @@ class Question extends Model
         'body',
         'user_id',
         'receiver',
+        'answer',
     ];
 
     public function user()
@@ -20,13 +21,13 @@ class Question extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function answers()
-    {
-        return $this->hasMany(Answer::class);
-    }
-
     public function receiver()
     {
-        return $this->belongsTo(User::class, 'receiver', 'id');
+        return $this->belongsTo(User::class, 'receiver');
+    }
+
+    public function likes()
+    {
+        $this->hasMany(Like::class);
     }
 }

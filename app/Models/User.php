@@ -47,14 +47,14 @@ class User extends Authenticatable
         ];
     }
 
-    public function questions()
+    public function questionsAsked()
     {
-        return $this->hasMany(Question::class);
+        return $this->hasMany(Question::class, 'user_id');
     }
 
-    public function answers()
+    public function questionsReceived()
     {
-        return $this->hasMany(Answer::class);
+        return $this->hasMany(Question::class, 'receiver');
     }
 
     public function likes()
