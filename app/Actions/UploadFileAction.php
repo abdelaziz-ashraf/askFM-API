@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use Illuminate\Http\UploadedFile;
 
-class UplaodFileAction
+class UploadFileAction
 {
     public function handle(UploadedFile $file)
     {

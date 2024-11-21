@@ -11,23 +11,23 @@ class Question extends Model
 
     protected $fillable = [
         'body',
-        'user_id',
+        'sender',
         'receiver',
         'answer',
     ];
 
-    public function user()
+    public function senderUser()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'sender');
     }
 
-    public function receiver()
+    public function receiverUser()
     {
         return $this->belongsTo(User::class, 'receiver');
     }
 
     public function likes()
     {
-        $this->hasMany(Like::class);
+        return $this->hasMany(Like::class);
     }
 }

@@ -2,40 +2,38 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\UplaodFileAction;
+use App\Actions\UploadFileAction ;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\VerifyCodeRequest;
 use App\Http\Resources\UserResource;
+use App\Http\Responses\SuccessResponse;
 use App\Models\User;
 use App\Models\VerificationCode;
+use App\Notifications\EmailVerifiedSuccessfullyNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request, UplaodFileAction $uplaoder)
+    public function register(RegisterRequest $request, UploadFileAction $uploader)
     {
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'image' => $request->hasFile('image') ? $uplaoder->handle($request->image) : null,
-        ]);
+        $data = $request->validated();
+        $data['password'] = Hash::make($data['password']);
+        $data['image'] = $request->hasFile('image') ? $uploader->handle($request->image) : null;
+        $user = User::create($data);
 
         event(new Registered($user));
 
-        $token = $user->createToken('verification')->plainTextToken;
-
-        return $this->successResponse([
-            'token' => $token,
-            'user' => UserResource::make($user),
-        ], 'User Registered Successfully', 200);
+        return SuccessResponse::send('Registered successfully.', [
+            'token' => $user->createToken('verification')->plainTextToken,
+            'user' => new UserResource($user),
+        ]);
     }
 
     public function login(LoginRequest $request)
@@ -50,12 +48,10 @@ class AuthController extends Controller
                 ]);
             }
 
-            $token = $user->createToken('Auth Token')->plainTextToken;
-
-            return $this->successResponse([
-                'token' => $token,
-                'user' => UserResource::make($user),
-            ], 'User Login Successfully', 200);
+            return SuccessResponse::send('Login successfully.', [
+                'token' => $user->createToken('Auth Token')->plainTextToken,
+                'user' => new UserResource($user),
+            ]);
         }
 
         throw ValidationException::withMessages([
@@ -67,23 +63,29 @@ class AuthController extends Controller
     {
         $user = User::where('email', $request->email)->first();
         if (! $user) {
-            return $this->errorResponse('User not found', 404);
+            throw ValidationException::withMessages([
+               'error' => ['The provided credentials are incorrect.'],
+            ]);
         }
 
         $verificationCode = VerificationCode::where('user_id', $user->id)
             ->where('code', $request->code)->first();
         if (! $verificationCode) {
-            return $this->errorResponse('Invalid code', 401);
+            throw ValidationException::withMessages([
+                'error' => ['Invalid code.'],
+            ]);
         }
 
         if ($verificationCode->expires_at < now()) {
-            return $this->errorResponse('Expired code', 401);
+            throw ValidationException::withMessages([
+                'error' => ['Expired code.'],
+            ]);
         }
 
         $user->markEmailAsVerified();
-        event(new Verified($user));
+        $user->notify(new EmailVerifiedSuccessfullyNotification());
         $verificationCode->delete();
 
-        return $this->successResponse(null, 'Code Verified Successfully', 200);
+        return SuccessResponse::send('Code verified successfully.');
     }
 }

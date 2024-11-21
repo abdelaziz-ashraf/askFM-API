@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\SeedLargeDataFactoryHelper;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,10 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        //TODO::
-        User::factory(99999999)->create([
-            'name' => 'Test User',
-        ]);
+        SeedLargeDataFactoryHelper::seedLargeData(User::class, 10, 1);
     }
 }

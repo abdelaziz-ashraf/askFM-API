@@ -4,26 +4,28 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\QuestionSent;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreQuestion;
 use App\Http\Resources\QuestionResource;
+use App\Http\Responses\SuccessResponse;
+use App\Models\Like;
 use App\Models\Question;
-use App\Models\User;
+use App\Notifications\LikeQuestionNotification;
+use App\Notifications\NewQuestionNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class QuestionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+
+    public function index()
     {
-        //TODO:: show only recomended questions
-        $questionsPerPage = $request->query('per_page', 10);
-        $page = $request->query('page', 10);
+        $questions = Question::with(['receiverUser'])
+            ->withCount('likes')
+            ->orderBy('likes_count', 'desc')
+            ->paginate();
 
-        $questions = Question::with(['user', 'answers'])->paginate($questionsPerPage, ['*'], 'page', $page);
-
-        return $this->successResponse(QuestionResource::collection($questions), 'Get all questions successfully.', 200, [
+        return SuccessResponse::send('Recommended questions', QuestionResource::collection($questions), meta:[
             'total' => $questions->total(),
             'per_page' => $questions->perPage(),
             'current_page' => $questions->currentPage(),
@@ -31,35 +33,48 @@ class QuestionController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request, User $receiver)
+    public function store(StoreQuestion $request, $receiver_id)
     {
-        //TODO:: use form request
-        //TODO:: validate user cant ask question to himself
-        //TODO:: validate trash words
-
-        $data = $request->validate([
-            'body' => 'required|string',
-        ]);
-
         $question = Question::create([
-            'user_id' => Auth::user()->id,
-            'body' => $data['body'],
-            'receiver' => $receiver->id,
+            'sender' => Auth::id(),
+            'body' => $request->input('body'),
+            'receiver' => $receiver_id,
         ]);
-
-        event(new QuestionSent($question, $receiver));
-
-        return $this->successResponse($question, 'Question created successfully', 201);
+        $question->receiverUser->notify(new NewQuestionNotification($question));
+        return SuccessResponse::send('Question created', new QuestionResource($question), 201);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Question $question)
     {
-        //
+        if($question->receiver !== Auth::id()){
+            throw ValidationException::withMessages([
+                'unauthorized' => ['This action is unauthorized.'],
+            ]);
+        }
+        $question->delete();
+        return SuccessResponse::send('Question deleted', statusCode: 201 );
+    }
+
+    public function toggleLike(Request $request, Question $question)
+    {
+        if(!$question->answer) {
+            throw validationException::withMessages([
+                'unauthorized' => ['You can not like unanswered question.'],
+            ]);
+        }
+
+        $like = $question->likes()->where('user_id', Auth::id())->first();
+        if ($like) {
+            $like->delete();
+            return SuccessResponse::send('Like deleted');
+        }
+
+        Like::create([
+            'user_id' => Auth::id(),
+            'question_id' => $question->id,
+        ]);
+        $user = $question->receiverUser;
+        $user->notify(new LikeQuestionNotification($question));
+        return SuccessResponse::send('Like created');
     }
 }

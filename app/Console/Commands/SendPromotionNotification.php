@@ -7,14 +7,14 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
-class SendPromotionEmails extends Command
+class SendPromotionNotification extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:send-promotion-emails';
+    protected $signature = 'app:send-promotion-notification';
 
     /**
      * The console command description.
@@ -29,13 +29,9 @@ class SendPromotionEmails extends Command
     public function handle()
     {
         $users = User::all();
-
         foreach ($users as $user) {
-            Mail::to($user->email)->queue(
-                new PromotionNotification($user)
-            );
+            $user->notify(new \App\Notifications\PromotionNotification());
         }
-
-        $this->info('Promotion emails have been queued successfully.');
+        $this->info('Promotions have been queued successfully.');
     }
 }

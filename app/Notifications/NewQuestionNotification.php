@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class LikeQuestionNotification extends Notification
+class NewQuestionNotification extends Notification
 {
     use Queueable;
 
@@ -36,8 +36,10 @@ class LikeQuestionNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('You have a new like for a question')
-                    ->line('Question: ' . $this->question->body);
+                    ->greeting('Hello, ' . $this->question->receiver)
+                    ->line('You have a new question.')
+                    ->line('The question is:' . $this->question->body)
+                    ->line('Thank you for using our application!');
     }
 
     /**

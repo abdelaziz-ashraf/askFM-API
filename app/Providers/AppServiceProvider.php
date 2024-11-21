@@ -33,20 +33,6 @@ class AppServiceProvider extends ServiceProvider
             SendVerificationCodeListener::class,
         );
 
-        Event::listen(
-            Verified::class,
-            SendWelcomeEmail::class
-        );
-
-        Event::listen(
-            QuestionSent::class,
-            SendQuestionNotification::class
-        );
-
-        Event::listen(
-            LikeCreated::class,
-            SendLikeNotification::class
-        );
 
     }
 }

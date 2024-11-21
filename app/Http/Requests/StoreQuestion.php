@@ -2,21 +2,22 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Question;
+use App\Models\User;
+use App\Rules\NoTrashWords;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class StoreAnswerRequest extends FormRequest
+class StoreQuestion extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        if (! Question::where('id', $this->question->id)->where('receiver', Auth::id())->exists()) {
+        $receiver = User::find($this->receiver_id);
+        if(Auth::id() == $this->user_id) {
             return false;
         }
-
         return true;
     }
 
@@ -28,7 +29,7 @@ class StoreAnswerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'answer' => 'required|string|max:500',
+            'body' => ['required', 'string', 'max:500', new NoTrashWords],
         ];
     }
 }

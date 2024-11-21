@@ -2,20 +2,20 @@
 
 namespace App\Notifications;
 
-use App\Models\Question;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class LikeQuestionNotification extends Notification
+class EmailVerifiedSuccessfullyNotification extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(readonly Question $question)
+    public function __construct()
     {
         //
     }
@@ -36,8 +36,9 @@ class LikeQuestionNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('You have a new like for a question')
-                    ->line('Question: ' . $this->question->body);
+                    ->greeting('Hello, ' . $notifiable->name . '!')
+                    ->line('Your Email ' . $notifiable->email . ' Verified Successfully.')
+                    ->line('Thank you for using our application!');
     }
 
     /**
