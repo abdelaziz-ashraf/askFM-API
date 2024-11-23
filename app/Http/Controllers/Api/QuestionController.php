@@ -9,6 +9,7 @@ use App\Http\Resources\QuestionResource;
 use App\Http\Responses\SuccessResponse;
 use App\Models\Like;
 use App\Models\Question;
+use App\Models\User;
 use App\Notifications\LikeQuestionNotification;
 use App\Notifications\NewQuestionNotification;
 use Illuminate\Http\Request;
@@ -33,12 +34,13 @@ class QuestionController extends Controller
         ]);
     }
 
-    public function store(StoreQuestion $request, $receiver_id)
+    public function store(StoreQuestion $request, User $receiver)
     {
+
         $question = Question::create([
             'sender' => Auth::id(),
             'body' => $request->input('body'),
-            'receiver' => $receiver_id,
+            'receiver' => $receiver->id,
         ]);
         $question->receiverUser->notify(new NewQuestionNotification($question));
         return SuccessResponse::send('Question created', new QuestionResource($question), 201);

@@ -16,13 +16,13 @@ Route::middleware(['auth:sanctum', EnsureEmailIsVerified::class])->group(functio
 
     Route::prefix('questions')->group(function () {
         Route::get('/', [QuestionController::class, 'index']); // Get recommended questions
-        Route::post('/{receiver_id}', [QuestionController::class, 'store']);
+        Route::post('/{receiver}', [QuestionController::class, 'store']);
         Route::delete('/{question}', [QuestionController::class, 'destroy']);
         Route::patch('/{question}/toggle-like', [QuestionController::class, 'toggleLike']);
     });
 
     Route::prefix('answers')->group(function () {
-        Route::get('/{user_id}', [AnswerController::class, 'index']); // Get user answers
+        Route::get('/{user}', [AnswerController::class, 'index']); // Get user answers
         Route::post('/{question}', [AnswerController::class, 'store']); // Answer a question
         Route::delete('/{question}', [AnswerController::class, 'destroy']);
     });

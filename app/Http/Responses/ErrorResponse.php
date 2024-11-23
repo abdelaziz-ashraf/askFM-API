@@ -7,6 +7,7 @@ class ErrorResponse {
         $response  = [
             'success' => false,
             'message' => $message,
+            'code' => $statusCode,
         ];
         if(!is_null($errors)) {
             $response['errors'] = $errors;

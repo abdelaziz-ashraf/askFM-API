@@ -7,16 +7,16 @@ use App\Http\Requests\StoreAnswerRequest;
 use App\Http\Resources\QuestionResource;
 use App\Http\Responses\SuccessResponse;
 use App\Models\Question;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AnswerController extends Controller
 {
-    public function index($user_id)
+    public function index(User $user)
     {
-        $questions = Question::where('receiver', $user_id)
+        $questions = $user->questionsReceived()
             ->whereNotNull('answer')
-            ->with(['receiverUser'])
             ->paginate();
         return SuccessResponse::send('Answers List', QuestionResource::collection($questions));
     }

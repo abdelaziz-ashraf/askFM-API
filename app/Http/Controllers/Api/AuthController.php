@@ -13,8 +13,6 @@ use App\Models\User;
 use App\Models\VerificationCode;
 use App\Notifications\EmailVerifiedSuccessfullyNotification;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;

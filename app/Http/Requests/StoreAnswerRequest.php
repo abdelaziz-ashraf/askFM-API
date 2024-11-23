@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Question;
+use App\Rules\NoTrashWords;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,7 +29,7 @@ class StoreAnswerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'answer' => 'required|string|max:500',
+            'answer' => ['required','string','max:500', new NoTrashWords],
         ];
     }
 }
